@@ -1,8 +1,15 @@
 let speed = 20;
-let scale = 0.17; // Image scale (I work on 1080p monitor)
+let scale = 0.17;
 let canvas;
 let ctx;
-let logoColor;
+
+// Array of image paths
+let images = [
+    'img1.png',
+    'img2.png',
+    'img3.png',
+    'img4.png'
+];
 
 let dvd = {
     x: 300,
@@ -15,52 +22,61 @@ let dvd = {
 (function main(){
     canvas = document.getElementById("tv-screen");
     ctx = canvas.getContext("2d");
-    dvd.img.src = 'dvd-logo.png';
 
-    //Draw the "tv screen"
+    // Set initial image
+    pickImage();
+
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    pickColor();
     update();
 })();
 
 function update() {
     setTimeout(() => {
-        //Draw the canvas background
+        // Clear screen
         ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        //Draw DVD Logo and his background
-        ctx.fillStyle = logoColor;
-        ctx.fillRect(dvd.x, dvd.y, dvd.img.width*scale, dvd.img.height*scale);
-        ctx.drawImage(dvd.img, dvd.x, dvd.y, dvd.img.width*scale, dvd.img.height*scale);
-        //Move the logo
-        dvd.x+=dvd.xspeed;
-        dvd.y+=dvd.yspeed;
-        //Check for collision 
+
+        // Draw image
+        ctx.drawImage(
+            dvd.img,
+            dvd.x,
+            dvd.y,
+            dvd.img.width * scale,
+            dvd.img.height * scale
+        );
+
+        // Move
+        dvd.x += dvd.xspeed;
+        dvd.y += dvd.yspeed;
+
+        // Check collisions
         checkHitBox();
-        update();   
-    }, speed)
+
+        update();
+    }, speed);
 }
 
-//Check for border collision
 function checkHitBox(){
-    if(dvd.x+dvd.img.width*scale >= canvas.width || dvd.x <= 0){
+    let hit = false;
+
+    if (dvd.x + dvd.img.width * scale >= canvas.width || dvd.x <= 0){
         dvd.xspeed *= -1;
-        pickColor();
+        hit = true;
     }
-        
-    if(dvd.y+dvd.img.height*scale >= canvas.height || dvd.y <= 0){
+
+    if (dvd.y + dvd.img.height * scale >= canvas.height || dvd.y <= 0){
         dvd.yspeed *= -1;
-        pickColor();
-    }    
+        hit = true;
+    }
+
+    // Change image only if bounced
+    if (hit) pickImage();
 }
 
-//Pick a random color in RGB format
-function pickColor(){
-    r = Math.random() * (254 - 0) + 0;
-    g = Math.random() * (254 - 0) + 0;
-    b = Math.random() * (254 - 0) + 0;
-
-    logoColor = 'rgb('+r+','+g+', '+b+')';
+// Pick a random image
+function pickImage(){
+    let randIndex = Math.floor(Math.random() * images.length);
+    dvd.img.src = images[randIndex];
 }
