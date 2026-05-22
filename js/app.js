@@ -5,10 +5,9 @@ let ctx;
 
 // Array of image paths
 let images = [
-    'img1.png',
-    'img2.png',
-    'img3.png',
-    'img4.png'
+    'https://raw.githubusercontent.com/AK9099080/bouncingmrdanner/93317cf49cc9b8ff35e8806f1dcb3ac661011ea8/1.jpg',
+    'https://raw.githubusercontent.com/AK9099080/bouncingmrdanner/93317cf49cc9b8ff35e8806f1dcb3ac661011ea8/2.webp',
+    'https://raw.githubusercontent.com/AK9099080/bouncingmrdanner/93317cf49cc9b8ff35e8806f1dcb3ac661011ea8/battleofneworleans.webp'
 ];
 
 let dvd = {
