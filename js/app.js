@@ -1,7 +1,15 @@
 let speed = 20;
-let scale = 0.17;
-let canvas;
-let ctx;
+let scale = 0.3; // make bigger so it's obvious
+
+let canvas = document.getElementById("tv-screen");
+let ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// ✅ TEMP: use a guaranteed working image
+let dvdImg = new Image();
+dvdImg.src = "https://upload.wikimedia.org/wikipedia/commons/9/9b/DVD_logo.svg";
 
 // Your background images
 let bgImages = [
@@ -13,79 +21,64 @@ let bgImages = [
 let bgImg = new Image();
 
 let dvd = {
-    x: 300,
-    y: 300,
-    xspeed: 2,
-    yspeed: 2,
-    img: new Image()
+    x: 200,
+    y: 200,
+    xspeed: 3,
+    yspeed: 3
 };
 
-(function main(){
-    canvas = document.getElementById("tv-screen");
-    ctx = canvas.getContext("2d");
+// ✅ Pick background safely
+function pickBackground(){
+    let index = Math.floor(Math.random() * bgImages.length);
+    let img = new Image();
+    img.src = bgImages[index];
 
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    dvd.img.src = 'dvd-logo.png';
-
-    // ✅ WAIT for logo to load before starting
-    dvd.img.onload = () => {
-        pickBackground();
-        update();
+    img.onload = () => {
+        bgImg = img;
     };
-})();
+}
+
+// ✅ MAIN START
+dvdImg.onload = () => {
+    pickBackground();
+    update();
+};
 
 function update() {
     setTimeout(() => {
 
-        ctx.fillStyle = '#000';
+        // clear screen
+        ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        let w = dvd.img.width * scale;
-        let h = dvd.img.height * scale;
+        let w = dvdImg.width * scale;
+        let h = dvdImg.height * scale;
 
-        // ✅ Only draw bg image if it's loaded
+        // ✅ ALWAYS draw something (debug fallback)
         if (bgImg.complete && bgImg.naturalWidth !== 0) {
             ctx.drawImage(bgImg, dvd.x, dvd.y, w, h);
+        } else {
+            ctx.fillStyle = "red"; // fallback so you SEE something
+            ctx.fillRect(dvd.x, dvd.y, w, h);
         }
 
-        // Draw main logo on top
-        ctx.drawImage(dvd.img, dvd.x, dvd.y, w, h);
+        ctx.drawImage(dvdImg, dvd.x, dvd.y, w, h);
 
         dvd.x += dvd.xspeed;
         dvd.y += dvd.yspeed;
 
-        checkHitBox();
+        // bounce detection
+        if (dvd.x + w >= canvas.width || dvd.x <= 0) {
+            dvd.xspeed *= -1;
+            pickBackground();
+        }
+
+        if (dvd.y + h >= canvas.height || dvd.y <= 0) {
+            dvd.yspeed *= -1;
+            pickBackground();
+        }
 
         update();
+
     }, speed);
-}
-
-function checkHitBox(){
-    let hit = false;
-
-    if (dvd.x + dvd.img.width * scale >= canvas.width || dvd.x <= 0){
-        dvd.xspeed *= -1;
-        hit = true;
-    }
-
-    if (dvd.y + dvd.img.height * scale >= canvas.height || dvd.y <= 0){
-        dvd.yspeed *= -1;
-        hit = true;
-    }
-
-    if (hit) pickBackground();
-}
-
-function pickBackground(){
-    let index = Math.floor(Math.random() * bgImages.length);
-
-    let newImg = new Image();
-    newImg.src = bgImages[index];
-
-    // ✅ only swap when loaded (prevents blank flicker)
-    newImg.onload = () => {
-        bgImg = newImg;
-    };
 }
