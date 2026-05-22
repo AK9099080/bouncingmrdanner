@@ -3,12 +3,14 @@ let scale = 0.17;
 let canvas;
 let ctx;
 
-// Array of image paths
-let images = [
+// Your background images
+let bgImages = [
     'https://raw.githubusercontent.com/AK9099080/bouncingmrdanner/93317cf49cc9b8ff35e8806f1dcb3ac661011ea8/1.jpg',
     'https://raw.githubusercontent.com/AK9099080/bouncingmrdanner/93317cf49cc9b8ff35e8806f1dcb3ac661011ea8/2.webp',
     'https://raw.githubusercontent.com/AK9099080/bouncingmrdanner/93317cf49cc9b8ff35e8806f1dcb3ac661011ea8/battleofneworleans.webp'
 ];
+
+let bgImg = new Image();
 
 let dvd = {
     x: 300,
@@ -22,35 +24,38 @@ let dvd = {
     canvas = document.getElementById("tv-screen");
     ctx = canvas.getContext("2d");
 
-    // Set initial image
-    pickImage();
-
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    update();
+    dvd.img.src = 'dvd-logo.png';
+
+    // ✅ WAIT for logo to load before starting
+    dvd.img.onload = () => {
+        pickBackground();
+        update();
+    };
 })();
 
 function update() {
     setTimeout(() => {
-        // Clear screen
+
         ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Draw image
-        ctx.drawImage(
-            dvd.img,
-            dvd.x,
-            dvd.y,
-            dvd.img.width * scale,
-            dvd.img.height * scale
-        );
+        let w = dvd.img.width * scale;
+        let h = dvd.img.height * scale;
 
-        // Move
+        // ✅ Only draw bg image if it's loaded
+        if (bgImg.complete && bgImg.naturalWidth !== 0) {
+            ctx.drawImage(bgImg, dvd.x, dvd.y, w, h);
+        }
+
+        // Draw main logo on top
+        ctx.drawImage(dvd.img, dvd.x, dvd.y, w, h);
+
         dvd.x += dvd.xspeed;
         dvd.y += dvd.yspeed;
 
-        // Check collisions
         checkHitBox();
 
         update();
@@ -70,12 +75,17 @@ function checkHitBox(){
         hit = true;
     }
 
-    // Change image only if bounced
-    if (hit) pickImage();
+    if (hit) pickBackground();
 }
 
-// Pick a random image
-function pickImage(){
-    let randIndex = Math.floor(Math.random() * images.length);
-    dvd.img.src = images[randIndex];
+function pickBackground(){
+    let index = Math.floor(Math.random() * bgImages.length);
+
+    let newImg = new Image();
+    newImg.src = bgImages[index];
+
+    // ✅ only swap when loaded (prevents blank flicker)
+    newImg.onload = () => {
+        bgImg = newImg;
+    };
 }
